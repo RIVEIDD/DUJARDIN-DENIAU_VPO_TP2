@@ -50,6 +50,27 @@ def part_3():
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def part_4():
+    img_name: str = "peppers-512.png"
+    src = os.path.join(os.getcwd(), "imagesDeTest", img_name)
+
+    img = cv2.imread(src, cv2.IMREAD_GRAYSCALE)
+    #itération sur les pixels :
+    new_img = numpy.zeros([512, 512, 1], dtype=numpy.uint8)
+    for i in range(0, 512, 1): #itère de 4 en 4 sur les pixels de l'image source
+        for j in range(0, 512, 1):
+            if  img[i , j ] >= 126 :
+                new_img[i , j ]= 255
+            else :
+                new_img[i , j ] = 0
+            
+
+    
+    cv2.imshow(img_name, img) #affiche image source
+    cv2.imshow("New " + img_name, new_img) #affiche nouvelle image
+    cv2.waitKey(0) #en attente d'une touche
+    cv2.destroyAllWindows() #ferme les images
+
 
 if __name__ == "__main__":
-    part_2()    
+    part_4()    
