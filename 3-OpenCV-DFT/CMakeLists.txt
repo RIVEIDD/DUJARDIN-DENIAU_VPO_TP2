@@ -1,0 +1,19 @@
+cmake_minimum_required ( VERSION 2.8)
+project ( DFT )
+
+# sources extension
+set(SRCEXT "cpp")
+
+file(
+    GLOB_RECURSE
+    source_files
+    *.${SRCEXT}
+)
+
+# required packages
+find_package ( OpenCV REQUIRED )
+
+add_executable(DFT dftSkeleton.cpp)
+
+# linking other libraries
+target_link_libraries(DFT  ${OpenCV_LIBS})
