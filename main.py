@@ -2,7 +2,8 @@
 
 import cv2
 import os
-import numpy
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 def part_2():
@@ -49,6 +50,78 @@ def part_3():
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
+
+
+
+# Charger l'image en niveaux de gris et la binariser
+image = cv2.imread('peppers-512.png', cv2.IMREAD_GRAYSCALE)
+_, binary_image = cv2.threshold(image, 128, 255, cv2.THRESH_BINARY)
+
+# Définir l'élément structurant (carré 3x3)
+kernel_size = 3
+kernel = np.ones((kernel_size, kernel_size), dtype=np.uint8)
+
+def erosion_manual(img, kernel):
+    """Implémentation manuelle de l'érosion."""
+    rows, cols = img.shape
+    krows, kcols = kernel.shape
+    pad = krows // 2
+    padded_img = np.pad(img, pad, mode='constant', constant_values=0)
+    result = np.zeros_like(img)
+
+    for i in range(rows):
+        for j in range(cols):
+            # Vérifier si le kernel s'applique entièrement
+            region = padded_img[i:i + krows, j:j + kcols]
+            if np.array_equal(region & kernel, kernel):  # Tous les pixels de la région sont blancs
+                result[i, j] = 255
+            else:
+                result[i, j] = 0
+    return result
+
+def dilation_manual(img, kernel):
+    """Implémentation manuelle de la dilatation."""
+    rows, cols = img.shape
+    krows, kcols = kernel.shape
+    pad = krows // 2
+    padded_img = np.pad(img, pad, mode='constant', constant_values=0)
+    result = np.zeros_like(img)
+
+    for i in range(rows):
+        for j in range(cols):
+            # Vérifier si au moins un pixel de la région est blanc
+            region = padded_img[i:i + krows, j:j + kcols]
+            if np.any(region & kernel):  # Au moins un pixel de la région est blanc
+                result[i, j] = 255
+            else:
+                result[i, j] = 0
+    return result
+
+# Appliquer l'érosion et la dilatation manuelles
+eroded_image = erosion_manual(binary_image, kernel)
+dilated_image = dilation_manual(binary_image, kernel)
+
+# Afficher les résultats
+plt.figure(figsize=(15, 5))
+plt.subplot(1, 3, 1)
+plt.title("Image binaire")
+plt.imshow(binary_image, cmap='gray')
+plt.axis('off')
+
+plt.subplot(1, 3, 2)
+plt.title("Érosion manuelle")
+plt.imshow(eroded_image, cmap='gray')
+plt.axis('off')
+
+plt.subplot(1, 3, 3)
+plt.title("Dilatation manuelle")
+plt.imshow(dilated_image, cmap='gray')
+plt.axis('off')
+
+plt.tight_layout()
+plt.show()
+
 
 def part_4():
     img_name: str = "peppers-512.png"
