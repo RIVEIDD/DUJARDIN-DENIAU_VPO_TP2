@@ -3,7 +3,6 @@
 import cv2
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def part_2():
@@ -15,7 +14,7 @@ def part_2():
     divisor: int = old_wh // new_wh #ratio entre ancienne et nouvelle image (ici 4)
 
     img = cv2.imread(src, cv2.IMREAD_GRAYSCALE) #permet de lire l'image
-    new_img = numpy.zeros([new_wh, new_wh, 1], dtype=numpy.uint8) #crée une nouvelle image vide de taille 64x64 en nuance de gris
+    new_img = np.zeros([new_wh, new_wh, 1], dtype=np.uint8) #crée une nouvelle image vide de taille 64x64 en nuance de gris
 
     for i in range(0, old_wh, divisor): #itère de 4 en 4 sur les pixels de l'image source
         for j in range(0, old_wh, divisor):
@@ -34,16 +33,16 @@ def part_3():
     img = cv2.imread(src, cv2.IMREAD_GRAYSCALE)
     #tableau de matrice des différents filtres : 
     filters = [
-        numpy.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]]) / 16,
-        numpy.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]]) / 9,
-        numpy.array([[1, -3, 1], [-3, 9, -3], [1, -3, 1]]),
-        numpy.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]),
-        numpy.array([[0, -1, -1], [1, 0, -1], [1, 1, 0]]),
-        numpy.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]]),
+        np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]]) / 16,
+        np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]]) / 9,
+        np.array([[1, -3, 1], [-3, 9, -3], [1, -3, 1]]),
+        np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]),
+        np.array([[0, -1, -1], [1, 0, -1], [1, 1, 0]]),
+        np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]]),
     ]
     #on itérère sur l'ensemble du tableau de matrices
     for i, filter_test in enumerate(filters):
-        dst = numpy.zeros([img.shape[0], img.shape[0], 1], dtype=numpy.uint8) #on définit comme destination une image vide
+        dst = np.zeros([img.shape[0], img.shape[0], 1], dtype=np.uint8) #on définit comme destination une image vide
         cv2.filter2D(img, -1, filter_test, dst) #on applique le filtre (filtre n°i) sur l'image "img" (ici peppers-512.png) et on enregistre le résultat dans l'image vide (dst)
         cv2.imshow(f"Filter {i} {img_name}", dst) #on affiche l'image filtrée
     cv2.imshow(img_name, img) #on affiche l'image source
@@ -54,20 +53,27 @@ def part_3():
 
 
 
-# Charger l'image en niveaux de gris et la binariser
-image = cv2.imread('peppers-512.png', cv2.IMREAD_GRAYSCALE)
-_, binary_image = cv2.threshold(image, 128, 255, cv2.THRESH_BINARY)
 
-# Définir l'élément structurant (carré 3x3)
-kernel_size = 3
-kernel = np.ones((kernel_size, kernel_size), dtype=np.uint8)
+
+
 
 def erosion_manual(img, kernel):
     """Implémentation manuelle de l'érosion."""
+    # Convertir l'image en niveaux de gris si nécessaire
+    if len(img.shape) == 3:  # Image en couleur (hauteur, largeur, canaux)
+        img = np.mean(img, axis=2).astype(np.uint8)  # Conversion en niveaux de gris
+    # Dimensions de l'image
     rows, cols = img.shape
+    # Dimensions du noyau
     krows, kcols = kernel.shape
-    pad = krows // 2
-    padded_img = np.pad(img, pad, mode='constant', constant_values=0)
+    # pad = krows // 2
+    # padded_img = np.pad(img, pad, mode='constant', constant_values=0)
+    # Padding nécessaire
+    pad_row = krows // 2
+    pad_col = kcols // 2
+    
+    # Ajouter du padding autour de l'image
+    padded_img = np.pad(img, ((pad_row, pad_row), (pad_col, pad_col)), mode='constant', constant_values=0)
     result = np.zeros_like(img)
 
     for i in range(rows):
@@ -82,6 +88,9 @@ def erosion_manual(img, kernel):
 
 def dilation_manual(img, kernel):
     """Implémentation manuelle de la dilatation."""
+    # Convertir l'image en niveaux de gris si nécessaire
+    if len(img.shape) == 3:  # Image en couleur (hauteur, largeur, canaux)
+        img = np.mean(img, axis=2).astype(np.uint8)  # Conversion en niveaux de gris
     rows, cols = img.shape
     krows, kcols = kernel.shape
     pad = krows // 2
@@ -98,30 +107,6 @@ def dilation_manual(img, kernel):
                 result[i, j] = 0
     return result
 
-# Appliquer l'érosion et la dilatation manuelles
-eroded_image = erosion_manual(binary_image, kernel)
-dilated_image = dilation_manual(binary_image, kernel)
-
-# Afficher les résultats
-plt.figure(figsize=(15, 5))
-plt.subplot(1, 3, 1)
-plt.title("Image binaire")
-plt.imshow(binary_image, cmap='gray')
-plt.axis('off')
-
-plt.subplot(1, 3, 2)
-plt.title("Érosion manuelle")
-plt.imshow(eroded_image, cmap='gray')
-plt.axis('off')
-
-plt.subplot(1, 3, 3)
-plt.title("Dilatation manuelle")
-plt.imshow(dilated_image, cmap='gray')
-plt.axis('off')
-
-plt.tight_layout()
-plt.show()
-
 
 def part_4():
     img_name: str = "peppers-512.png"
@@ -129,20 +114,29 @@ def part_4():
 
     img = cv2.imread(src, cv2.IMREAD_GRAYSCALE)
     #itération sur les pixels :
-    new_img = numpy.zeros([512, 512, 1], dtype=numpy.uint8)
+    new_img = np.zeros([512, 512, 1], dtype=np.uint8)
     for i in range(0, 512, 1): #itère de 4 en 4 sur les pixels de l'image source
         for j in range(0, 512, 1):
             if  img[i , j ] >= 126 :
                 new_img[i , j ]= 255
             else :
                 new_img[i , j ] = 0
-            
-
     
-    cv2.imshow(img_name, img) #affiche image source
-    cv2.imshow("New " + img_name, new_img) #affiche nouvelle image
-    cv2.waitKey(0) #en attente d'une touche
-    cv2.destroyAllWindows() #ferme les images
+    # Définir l'élément structurant (carré 3x3)
+    kernel_size = 3
+    kernel = np.ones((kernel_size, kernel_size), dtype=np.uint8)
+    # Appliquer l'érosion et la dilatation manuelles
+    eroded_image = erosion_manual(new_img, kernel)
+    dilated_image = dilation_manual(new_img, kernel)   
+    # Afficher les résultats avec OpenCV
+    cv2.imshow("Image binaire", new_img)
+    cv2.imshow("Érosion manuelle", eroded_image)
+    cv2.imshow("Dilatation manuelle", dilated_image)
+
+    # Attendre que l'utilisateur appuie sur une touche pour fermer les fenêtres
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
 
 
 if __name__ == "__main__":
