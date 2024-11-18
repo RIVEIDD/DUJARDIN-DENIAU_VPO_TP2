@@ -3,7 +3,7 @@
 import cv2
 import os
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 
 def part_2():
@@ -143,33 +143,33 @@ def part_5():
     src = os.path.join(os.getcwd(), "imagesDeTest", img_name)
     img = cv2.imread(src, cv2.IMREAD_GRAYSCALE)
 
-    dft = np.fft.fft2(img)
-    dft_shift = np.fft.fftshift(dft)
-    magnitude_spectrum = 20 * np.log(np.abs(dft_shift))
-    phase_spectrum = np.angle(dft_shift)
+    dft = np.fft.fft2(img) #réalisation de la transformée de fourrier
+    dft_shift = np.fft.fftshift(dft) #décalage de la transformée de fourrier pour une meilleure visibilité 
+    magnitude_spectrum = 20 * np.log(np.abs(dft_shift)) #calcul de la magnitude
+    phase_spectrum = np.angle(dft_shift) #calcul de la phase
 
     plt.subplot(231), plt.imshow(img, cmap="gray")
     plt.title(img_name), plt.xticks([]), plt.yticks([])
     plt.subplot(232), plt.imshow(magnitude_spectrum, cmap="gray")
-    plt.title("Magnitude spectrum"), plt.xticks([]), plt.yticks([])
+    plt.title("Magnitude"), plt.xticks([]), plt.yticks([])
     plt.subplot(233), plt.imshow(phase_spectrum, cmap="gray")
-    plt.title("Phase spectrum"), plt.xticks([]), plt.yticks([])
+    plt.title("Phase"), plt.xticks([]), plt.yticks([])
 
     im_center = tuple(np.array(img.shape[1::-1]) / 2)
     rot_mat = cv2.getRotationMatrix2D(im_center, 90, 1.0)
 
-    rotated_img = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
+    rotated_img = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR) #image retournée de 90 degrés 
     r_dft = np.fft.fft2(rotated_img)
     r_dft_shift = np.fft.fftshift(r_dft)
     r_magnitude_spectrum = 20 * np.log(np.abs(r_dft_shift))
     r_phase_spectrum = np.angle(r_dft_shift)
 
     plt.subplot(234), plt.imshow(rotated_img, cmap="gray")
-    plt.title(f"R90° {img_name}"), plt.xticks([]), plt.yticks([])
+    plt.title(f"Rotation 90° {img_name}"), plt.xticks([]), plt.yticks([])
     plt.subplot(235), plt.imshow(r_magnitude_spectrum, cmap="gray")
-    plt.title("Magnitude spectrum"), plt.xticks([]), plt.yticks([])
+    plt.title("Magnitude"), plt.xticks([]), plt.yticks([])
     plt.subplot(236), plt.imshow(r_phase_spectrum, cmap="gray")
-    plt.title("Phase spectrum"), plt.xticks([]), plt.yticks([])
+    plt.title("Phase"), plt.xticks([]), plt.yticks([])
 
     plt.show()
 
